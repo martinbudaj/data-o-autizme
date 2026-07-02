@@ -1,24 +1,26 @@
 import { useMemo, useState } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function TrendChart({ years, insurers }) {
   const [enabledIds, setEnabledIds] = useState(() => new Set(insurers.map((insurer) => insurer.id)))
 
   const chartData = useMemo(
     () =>
-      years.map((year, yearIndex) => ({
-        year,
-        total: insurers.reduce(
-          (sum, insurer) => (enabledIds.has(insurer.id) ? sum + insurer.values[yearIndex] : sum),
-          0,
-        ),
-      })),
-    [years, insurers, enabledIds],
+      years.map((year, yearIndex) => {
+        const row = { year }
+        insurers.forEach((insurer) => {
+          row[insurer.id] = insurer.values[yearIndex]
+        })
+        return row
+      }),
+    [years, insurers],
   )
+
+  const visibleInsurers = insurers.filter((insurer) => enabledIds.has(insurer.id))
 
   function toggleInsurer(id) {
     setEnabledIds((prev) => {
-      // at least one insurer must stay active so the line never goes empty
+      // at least one insurer must stay active so the bars never go empty
       if (prev.has(id) && prev.size === 1) return prev
 
       const next = new Set(prev)
@@ -36,21 +38,22 @@ export default function TrendChart({ years, insurers }) {
       <h2 className="dashboard__section-title">Autizmus na Slovensku 2015 – 2025</h2>
       <div className="dashboard__chart">
         <ResponsiveContainer width="100%" height={340}>
-          <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
+          <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis />
+            <YAxis tickFormatter={(value) => value.toLocaleString('sk-SK')} />
             <Tooltip formatter={(value) => value.toLocaleString('sk-SK')} />
-            <Line
-              type="monotone"
-              dataKey="total"
-              name="Celkový počet pacientov"
-              stroke="#1f2430"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-              isAnimationActive={false}
-            />
-          </LineChart>
+            {visibleInsurers.map((insurer, index) => (
+              <Bar
+                key={insurer.id}
+                dataKey={insurer.id}
+                name={insurer.name}
+                stackId="total"
+                fill={insurer.color}
+                radius={index === visibleInsurers.length - 1 ? [4, 4, 0, 0] : 0}
+              />
+            ))}
+          </BarChart>
         </ResponsiveContainer>
 
         <div className="dashboard__insurer-legend">

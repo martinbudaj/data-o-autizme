@@ -10,9 +10,9 @@ export default function RegionChart({ data }) {
           margin={{ top: 8, right: 24, left: 24, bottom: 8 }}
         >
           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-          <XAxis type="number" />
+          <XAxis type="number" tickFormatter={(value) => value.toLocaleString('sk-SK')} />
           <YAxis type="category" dataKey="region" width={120} />
-          <Tooltip />
+          <Tooltip formatter={(value) => value.toLocaleString('sk-SK')} />
           <Bar dataKey="count" name="Počet osôb" fill="#2fb380" radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>
