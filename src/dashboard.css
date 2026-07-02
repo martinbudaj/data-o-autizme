@@ -102,3 +102,46 @@
   color: #8b93a7;
   margin-top: 8px;
 }
+
+#dashboard .dashboard__section--main {
+  margin-bottom: 40px;
+}
+
+#dashboard .dashboard__insurer-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eef0f5;
+}
+
+#dashboard .dashboard__insurer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d7dbe6;
+  background: #fff;
+  color: #9aa1b3;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+#dashboard .dashboard__insurer-btn--active {
+  color: #1f2430;
+  border-color: var(--insurer-color);
+}
+
+#dashboard .dashboard__insurer-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--insurer-color);
+}
+
+#dashboard .dashboard__insurer-btn:not(.dashboard__insurer-btn--active) .dashboard__insurer-dot {
+  opacity: 0.35;
+}

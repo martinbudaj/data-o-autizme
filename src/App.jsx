@@ -3,8 +3,10 @@ import summaryByYear from '../data/summary.json'
 import ageDistributionByYear from '../data/ageDistribution.json'
 import regionDistributionByYear from '../data/regionDistribution.json'
 import diagnosisStructureByYear from '../data/diagnosisStructure.json'
+import insuranceHistory from '../data/insuranceHistory.json'
 import YearToggle from './components/YearToggle.jsx'
 import KpiCards from './components/KpiCards.jsx'
+import TrendChart from './components/TrendChart.jsx'
 import AgeChart from './components/AgeChart.jsx'
 import RegionChart from './components/RegionChart.jsx'
 import DiagnosisChart from './components/DiagnosisChart.jsx'
@@ -17,6 +19,8 @@ export default function App() {
 
   return (
     <>
+      <TrendChart years={insuranceHistory.years} insurers={insuranceHistory.insurers} />
+
       <header className="dashboard__header">
         <h1 className="dashboard__title">Dáta o autizme na Slovensku</h1>
         <YearToggle years={YEARS} activeYear={year} onChange={setYear} />

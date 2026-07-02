@@ -21,6 +21,10 @@ src/
 - `data/summary.json` — KPI hodnoty (počet, medziročný nárast, prevalencia, najpočetnejšia veková skupina).
 - `data/ageDistribution.json`, `data/regionDistribution.json`, `data/diagnosisStructure.json` —
   dáta pre jednotlivé grafy, každý záznam `{ label, count/percent }`.
+- `data/insuranceHistory.json` — výnimka z `{ "<rok>": [...] }` tvaru: nie je viazaná
+  na ročný prepínač, ale nesie celú časovú radu `2015–2025` naraz (pre hlavný graf
+  `TrendChart`). Tvar `{ years: [...], insurers: [{ id, name, color, values: [...] }] }`,
+  kde `values[i]` zodpovedá `years[i]`.
 - Komponenty dáta importujú priamo (`import x from '../data/x.json'`) — žiadny fetch,
   žiadny API layer. Aktuálne dáta sú ukážkové/orientačné, nie oficiálna štatistika.
 
