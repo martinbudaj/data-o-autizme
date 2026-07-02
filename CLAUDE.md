@@ -47,6 +47,15 @@ Táto appka sa embeduje do cudzej stránky, takže:
   a nerozbilo hosťujúcu stránku.
 - `App.jsx` nevykresľuje vlastný `<div id="dashboard">` — ten je už v `index.html`
   (resp. v hostiteľskej stránke pri embede) a React sa doň iba mountuje cez `main.jsx`.
+- Platí to aj opačným smerom: hosťujúca stránka môže mať vlastné neskopované
+  pravidlá na holé tagy (napr. kompasio.sk má v `style.css` `section { float: left;
+  padding: 100px 0; ... }` pre svoje vlastné sekcie), ktoré nám bez varovania
+  rozbijú layout zvnútra. Preto `dashboard.css` obsahuje defenzívny reset
+  (`#dashboard section, #dashboard header { float: none; position: static; ... }`),
+  ktorý vďaka ID selektoru prebije hostiteľove pravidlá na holé tagy bez ohľadu
+  na poradie štýlov v `<head>`. Ak pridáš komponent s ďalším sémantickým tagom
+  (napr. `<article>`, `<aside>`), over si na cieľovej stránke, či ho hostiteľ
+  tiež neštyluje, a pridaj mu rovnaký reset.
 
 ## Build
 
