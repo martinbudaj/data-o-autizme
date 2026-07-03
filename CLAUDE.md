@@ -25,8 +25,32 @@ src/
   na ročný prepínač, ale nesie celú časovú radu `2015–2025` naraz (pre hlavný graf
   `TrendChart`). Tvar `{ years: [...], insurers: [{ id, name, color, values: [...] }] }`,
   kde `values[i]` zodpovedá `years[i]`.
+- `data/ageBreakdown.json`, `data/regionBreakdown.json` — rovnaká časová rada, ale
+  rozpad počtu poistencov po poisťovni podľa vekovej skupiny/kraja. Tvar
+  `{ years: [...], ageGroups/regions: [...], insurers: { "<insurerId>": { "<rok>": [...] } } }`,
+  kde `values[i]` zodpovedá `ageGroups[i]`/`regions[i]`. Slúžia ako doplnkové filtre
+  k `TrendChart` (pozri nižšie) — nejde o joint distribúciu, vek a kraj sú len dve
+  samostatné 2-rozmerné tabuľky voči poisťovni a roku.
 - Komponenty dáta importujú priamo (`import x from '../data/x.json'`) — žiadny fetch,
   žiadny API layer. Aktuálne dáta sú ukážkové/orientačné, nie oficiálna štatistika.
+
+## TrendChart — filtrovanie podľa poisťovne/veku/kraja
+
+`TrendChart.jsx` renderuje tri nezávislé multi-select filtre (`FilterGroup.jsx`):
+poisťovne (vždy rozbalené, len 3 položky), veková štruktúra a kraje (obe
+zbalené defaultne — "všetky", rozbaľujú sa tapnutím kvôli množstvu položiek
+na mobile). V každej skupine musí ostať vybraná aspoň jedna položka.
+
+Keďže `ageBreakdown.json` a `regionBreakdown.json` sú dve oddelené 2-rozmerné
+tabuľky (vek×poisťovňa×rok a kraj×poisťovňa×rok), **nemáme reálnu jointovú
+distribúciu** vek×kraj. Výpočet v `TrendChart` preto:
+- ak je obmedzený len vek ALEBO len kraj → presný súčet priamo z príslušnej tabuľky,
+- ak sú obmedzené oba naraz → súčin (odhad za predpokladu štatistickej nezávislosti
+  vek/kraj v rámci danej poisťovne a roka) a pod grafom sa zobrazí `.dashboard__note`
+  upozorňujúca, že ide o orientačný odhad.
+
+Ak pribudnú reálne kombinované dáta (vek×kraj×poisťovňa×rok), tento fallback
+na súčin by sa dal nahradiť presným výpočtom.
 
 ## Ako pridať nový graf
 
@@ -70,7 +94,7 @@ Táto appka sa embeduje do cudzej stránky, takže:
 Príkazy:
 
 ```
-npm install   # inštalácia (žiadny package-lock.json zatiaľ nie je commitnutý)
+npm install   # inštalácia
 npm run dev   # lokálny dev server
 npm run build # produkčný build do dist/
 ```

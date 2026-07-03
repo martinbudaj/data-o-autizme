@@ -1,37 +1,78 @@
 import { useMemo, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import ageBreakdown from '../../data/ageBreakdown.json'
+import regionBreakdown from '../../data/regionBreakdown.json'
+import FilterGroup from './FilterGroup.jsx'
+
+function toggleInSet(set, id) {
+  // at least one item must stay selected so the chart never goes empty
+  if (set.has(id) && set.size === 1) return set
+
+  const next = new Set(set)
+  if (next.has(id)) {
+    next.delete(id)
+  } else {
+    next.add(id)
+  }
+  return next
+}
+
+function sumSelected(values, labels, selected) {
+  return labels.reduce((sum, label, index) => (selected.has(label) ? sum + values[index] : sum), 0)
+}
 
 export default function TrendChart({ years, insurers }) {
-  const [enabledIds, setEnabledIds] = useState(() => new Set(insurers.map((insurer) => insurer.id)))
+  const [selectedInsurerIds, setSelectedInsurerIds] = useState(
+    () => new Set(insurers.map((insurer) => insurer.id)),
+  )
+  const [selectedAgeGroups, setSelectedAgeGroups] = useState(() => new Set(ageBreakdown.ageGroups))
+  const [selectedRegions, setSelectedRegions] = useState(() => new Set(regionBreakdown.regions))
+
+  const ageAllSelected = selectedAgeGroups.size === ageBreakdown.ageGroups.length
+  const regionAllSelected = selectedRegions.size === regionBreakdown.regions.length
+  // age and region only come from separate breakdown tables, not a joint one —
+  // combining both filters at once has to fall back to a proportional (independence) estimate
+  const isApproximated = !ageAllSelected && !regionAllSelected
+
+  const visibleInsurers = insurers.filter((insurer) => selectedInsurerIds.has(insurer.id))
 
   const chartData = useMemo(
     () =>
       years.map((year, yearIndex) => {
+        const yearKey = String(year)
         const row = { year }
-        insurers.forEach((insurer) => {
-          row[insurer.id] = insurer.values[yearIndex]
+
+        visibleInsurers.forEach((insurer) => {
+          if (ageAllSelected && regionAllSelected) {
+            row[insurer.id] = insurer.values[yearIndex]
+            return
+          }
+
+          const ageValues = ageBreakdown.insurers[insurer.id][yearKey]
+          const ageSum = sumSelected(ageValues, ageBreakdown.ageGroups, selectedAgeGroups)
+
+          if (regionAllSelected) {
+            row[insurer.id] = ageSum
+            return
+          }
+
+          const regionValues = regionBreakdown.insurers[insurer.id][yearKey]
+          const regionRowTotal = regionValues.reduce((sum, value) => sum + value, 0)
+          const regionSum = sumSelected(regionValues, regionBreakdown.regions, selectedRegions)
+
+          if (ageAllSelected) {
+            row[insurer.id] = regionSum
+            return
+          }
+
+          const regionFraction = regionRowTotal > 0 ? regionSum / regionRowTotal : 0
+          row[insurer.id] = Math.round(ageSum * regionFraction)
         })
+
         return row
       }),
-    [years, insurers],
+    [years, visibleInsurers, selectedAgeGroups, selectedRegions, ageAllSelected, regionAllSelected],
   )
-
-  const visibleInsurers = insurers.filter((insurer) => enabledIds.has(insurer.id))
-
-  function toggleInsurer(id) {
-    setEnabledIds((prev) => {
-      // at least one insurer must stay active so the bars never go empty
-      if (prev.has(id) && prev.size === 1) return prev
-
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      return next
-    })
-  }
 
   return (
     <section className="dashboard__section dashboard__section--main">
@@ -56,28 +97,35 @@ export default function TrendChart({ years, insurers }) {
           </BarChart>
         </ResponsiveContainer>
 
-        <div className="dashboard__insurer-legend">
-          {insurers.map((insurer) => {
-            const active = enabledIds.has(insurer.id)
-            return (
-              <button
-                key={insurer.id}
-                type="button"
-                className={
-                  active
-                    ? 'dashboard__insurer-btn dashboard__insurer-btn--active'
-                    : 'dashboard__insurer-btn'
-                }
-                style={{ '--insurer-color': insurer.color }}
-                onClick={() => toggleInsurer(insurer.id)}
-                aria-pressed={active}
-              >
-                <span className="dashboard__insurer-dot" />
-                {insurer.name}
-              </button>
-            )
-          })}
+        <div className="dashboard__filters">
+          <FilterGroup
+            title="Zdravotné poisťovne"
+            items={insurers.map((insurer) => ({ id: insurer.id, label: insurer.name, color: insurer.color }))}
+            selectedIds={selectedInsurerIds}
+            onToggle={(id) => setSelectedInsurerIds((prev) => toggleInSet(prev, id))}
+            collapsible={false}
+          />
+          <FilterGroup
+            title="Veková štruktúra"
+            items={ageBreakdown.ageGroups.map((group) => ({ id: group, label: group }))}
+            selectedIds={selectedAgeGroups}
+            onToggle={(id) => setSelectedAgeGroups((prev) => toggleInSet(prev, id))}
+          />
+          <FilterGroup
+            title="Kraje"
+            items={regionBreakdown.regions.map((region) => ({ id: region, label: region }))}
+            selectedIds={selectedRegions}
+            onToggle={(id) => setSelectedRegions((prev) => toggleInSet(prev, id))}
+          />
         </div>
+
+        {isApproximated && (
+          <p className="dashboard__note">
+            Pri súčasnom filtrovaní podľa veku aj kraja naraz je súčet orientačný odhad
+            (predpoklad štatistickej nezávislosti oboch kategórií — presná kombinovaná
+            evidencia nie je k dispozícii).
+          </p>
+        )}
       </div>
     </section>
   )
