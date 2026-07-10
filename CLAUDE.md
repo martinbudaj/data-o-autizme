@@ -52,6 +52,32 @@ distribúciu** vek×kraj. Výpočet v `TrendChart` preto:
 Ak pribudnú reálne kombinované dáta (vek×kraj×poisťovňa×rok), tento fallback
 na súčin by sa dal nahradiť presným výpočtom.
 
+## AgeStructureChart — 100% skladaný plošný graf
+
+`AgeStructureChart.jsx` (hneď pod `TrendChart`) ukazuje vývoj vekovej štruktúry
+pacientov v čase (2015–2025) ako percentuálny podiel, nie absolútny počet.
+Počíta si dáta priamo z `ageBreakdown.json` (súčet cez všetky poisťovne za
+každý rok, prevod na %) — nie je to samostatný dátový súbor.
+
+10 pôvodných vekových pásiem je pre jeden graf príliš veľa farebných tried
+(dataviz pravidlá: ordinal paleta max ~5-7, inak susedné odtiene splývajú),
+preto sa tu zlučujú do 5 skupín: `0-9`, `10-19`, `20-29`, `30-39`, `40+`.
+Plná desaťročná granularita ostáva dostupná vo filtri "Veková štruktúra" v
+`TrendChart`. Farby sú jeden modrý ordinal ramp (svetlá = najmladší, tmavá =
+najstarší), validované cez dataviz skill (`--ordinal`, 5 krokov, všetky
+kontroly PASS).
+
+Pozor na Recharts s `<Area stroke="#fff" .../>` (biely stroke kvôli 2px
+medzere medzi segmentmi stacku): Recharts defaultne odvodí farbu textu aj
+ikony **legendy aj tooltipu** zo `stroke`, takže bez zásahu vyjde biely text
+na bielom pozadí (== neviditeľné). Legenda to rieši explicitným `payload`
+(farba z `fill`) a `formatter` (text natvrdo v `#1f2430`). Tooltip nepoužíva
+vstavaný `formatter` (ten len prefarbí jednu hodnotu, nie riadok), ale vlastný
+`content={<AgeStructureTooltip />}` komponent, ktorý pre každú vekovú skupinu
+vypíše farebnú bodku (z `group.color`) + percento + absolútny počet (ten sa
+počíta do `chartData` navyše ako `<label>__count`, mimo % hodnoty použitej
+na stacking).
+
 ## Ako pridať nový graf
 
 1. Priprav dáta ako nový JSON v `/data`, ideálne v tvare `{ "<rok>": [...] }`

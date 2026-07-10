@@ -120,6 +120,47 @@
   margin-top: 8px;
 }
 
+#dashboard .dashboard__chart-tooltip {
+  background: #fff;
+  border: 1px solid #eef0f5;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 12px rgba(31, 36, 48, 0.12);
+  font-size: 0.8rem;
+}
+
+#dashboard .dashboard__chart-tooltip-title {
+  font-weight: 600;
+  color: #1f2430;
+  margin-bottom: 6px;
+}
+
+#dashboard .dashboard__chart-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+#dashboard .dashboard__chart-tooltip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+#dashboard .dashboard__chart-tooltip-label {
+  color: #6b7280;
+  flex: 1;
+  white-space: nowrap;
+}
+
+#dashboard .dashboard__chart-tooltip-value {
+  color: #1f2430;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 #dashboard .dashboard__section--main {
   margin-bottom: 40px;
 }

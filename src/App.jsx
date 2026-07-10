@@ -7,6 +7,7 @@ import insuranceHistory from '../data/insuranceHistory.json'
 import YearToggle from './components/YearToggle.jsx'
 import KpiCards from './components/KpiCards.jsx'
 import TrendChart from './components/TrendChart.jsx'
+import AgeStructureChart from './components/AgeStructureChart.jsx'
 import AgeChart from './components/AgeChart.jsx'
 import RegionChart from './components/RegionChart.jsx'
 import DiagnosisChart from './components/DiagnosisChart.jsx'
@@ -20,6 +21,8 @@ export default function App() {
   return (
     <>
       <TrendChart years={insuranceHistory.years} insurers={insuranceHistory.insurers} />
+
+      <AgeStructureChart />
 
       <header className="dashboard__header">
         <h1 className="dashboard__title">Dáta o autizme na Slovensku</h1>
